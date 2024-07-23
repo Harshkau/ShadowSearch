@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowSearch</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="https://icons.veryicon.com/png/o/miscellaneous/small-yellow-icon/search-361.png">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      text-align: center;
+      background: #1f1f1f;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 1000px;
+      margin: 20px auto;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #fdf20f;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    #search-type {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      background-color: #333;
+      color: #e0e0e0;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    #search-input {
+      width: calc(90% - 40px);
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      background-color: #333;
+      color: #e0e0e0;
+      padding-left: 40px;
+      font-size: 1rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: #888;
+    }
+
+    .mic-icon {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      color: #888;
+      cursor: pointer;
+    }
+
+    #search-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #ffff00;
+      color: #000000;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    #search-button:hover {
+      background-color: #aab300;
+    }
+
+    #results {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .result {
+      background: #2c2c2c;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      width: calc(33% - 20px);
+    }
+
+    .result:hover {
+      transform: scale(1.05);
+    }
+
+    .result img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .result .content {
+      padding: 10px;
+    }
+
+    .result .title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #ffffff;
+    }
+
+    .result .snippet {
+      font-size: 0.9rem;
+      color: #cccccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #content-iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      margin-top: 20px;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .result {
+        width: calc(50% - 20px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .result {
+        width: 100%;
+      }
+
+      #search-input {
+        padding-left: 35px;
+        width: fit-content;
+      }
+
+      .search-icon {
+        left: 10px;
+      }
+
+      #search-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ShadowSearch</h1>
+    <div class="search-bar">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" id="search-input" placeholder="Search for anything...">
+      <i class="fas fa-microphone mic-icon" id="mic-button"></i>
+    </div>
+    <select id="search-type">
+      <option value="web">Web Search</option>
+      <option value="image">Image Search</option>
+    </select>
+    <button id="search-button">Search</button>
+    <div id="results"></div>
+    <iframe id="content-iframe"></iframe>
+  </div>
+  <script>
+    document.getElementById('search-button').addEventListener('click', () => {
+      const query = document.getElementById('search-input').value;
+      const searchType = document.getElementById('search-type').value;
+      search(query, searchType, 1); // Start with the first page
+    });
+
+    document.getElementById('mic-button').addEventListener('click', () => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        document.getElementById('search-input').value = event.results[0][0].transcript;
+        document.getElementById('search-button').click();
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    });
+
+    function search(query, searchType, startIndex) {
+      const apiKey = 'AIzaSyCtfg0yeV2umCkaPAsoLTzldFgR1_Gms1E'; // Replace with your actual API key
+      const cx = '27754bbb47ae0468a'; // Replace with your actual CSE ID
+      const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}&start=${startIndex}${searchType === 'image' ? '&searchType=image' : ''}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          displayResults(data.items, searchType);
+          // If there are more results, fetch the next page
+          if (data.queries.nextPage) {
+            const nextPageIndex = data.queries.nextPage[0].startIndex;
+            const moreButton = document.createElement('button');
+            moreButton.textContent = 'Show More Results';
+            moreButton.addEventListener('click', () => {
+              search(query, searchType, nextPageIndex);
+              moreButton.remove(); // Remove the button after click
+            });
+            document.getElementById('results').appendChild(moreButton);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    function displayResults(results, searchType) {
+      const resultsContainer = document.getElementById('results');
+      if (!results) return;
+
+      resultsContainer.innerHTML = '';
+
+      results.forEach(result => {
+        const resultElement = document.createElement('div');
+        resultElement.classList.add('result');
+
+        if (searchType === 'image') {
+          resultElement.innerHTML = `
+            <a href="${result.link}" target="_blank">
+              <img src="${result.link}" alt="${result.title}">
+            </a>
+          `;
+        } else {
+          const icon = result.pagemap && result.pagemap.cse_image ? result.pagemap.cse_image[0].src : '';
+          resultElement.innerHTML = `
+            ${icon ? `<a href="${result.link}" target="_blank"><img class="icon" src="${icon}" alt="${result.title}"></a>` : ''}
+            <div class="content">
+              <a href="${result.link}" target="_blank" class="title">${result.title}</a>
+              <div class="snippet">${result.snippet}</div>
+            </div>
+          `;
+        }
+
+        resultsContainer.appendChild(resultElement);
+      });
+    }
+  </script>
+</body>
+</html>
