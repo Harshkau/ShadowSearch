@@ -55,7 +55,7 @@
     }
 
     #search-input {
-      width: calc(90% - 40px);
+      width: calc(96% - 22px);
       padding: 10px;
       border-radius: 5px;
       border: 1px solid #333;
@@ -71,15 +71,6 @@
       left: 15px;
       transform: translateY(-50%);
       color: #888;
-    }
-
-    .mic-icon {
-      position: absolute;
-      top: 50%;
-      right: 15px;
-      transform: translateY(-50%);
-      color: #888;
-      cursor: pointer;
     }
 
     #search-button {
@@ -176,7 +167,6 @@
 
       #search-input {
         padding-left: 35px;
-        width: fit-content;
       }
 
       .search-icon {
@@ -195,7 +185,6 @@
     <div class="search-bar">
       <i class="fas fa-search search-icon"></i>
       <input type="text" id="search-input" placeholder="Search for anything...">
-      <i class="fas fa-microphone mic-icon" id="mic-button"></i>
     </div>
     <select id="search-type">
       <option value="web">Web Search</option>
@@ -210,21 +199,6 @@
       const query = document.getElementById('search-input').value;
       const searchType = document.getElementById('search-type').value;
       search(query, searchType, 1); // Start with the first page
-    });
-
-    document.getElementById('mic-button').addEventListener('click', () => {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.start();
-
-      recognition.onresult = (event) => {
-        document.getElementById('search-input').value = event.results[0][0].transcript;
-        document.getElementById('search-button').click();
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-      };
     });
 
     function search(query, searchType, startIndex) {
