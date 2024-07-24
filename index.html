@@ -223,15 +223,15 @@ button:hover {
     });
 
     function search(query, searchType, startIndex) {
-      const apiKey = 'AIzaSyCtfg0yeV2umCkaPAsoLTzldFgR1_Gms1E'; // Replace with your actual API key
-      const cx = '27754bbb47ae0468a'; // Replace with your actual CSE ID
+      const apiKey = 'AIzaSyCh5-KFuGPrwmBX4JtcC8u41Lyn7B7Dpk0'; 
+      const cx = '27754bbb47ae0468a'; 
       const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}&start=${startIndex}${searchType === 'image' ? '&searchType=image' : ''}`;
 
       fetch(url)
         .then(response => response.json())
         .then(data => {
           displayResults(data.items, searchType);
-          // If there are more results, fetch the next page
+          
           if (data.queries.nextPage) {
             const nextPageIndex = data.queries.nextPage[0].startIndex;
             const moreButton = document.createElement('button');
